@@ -6,6 +6,7 @@ group 'org.example'
 version '1.0-SNAPSHOT'
 
 repositories {
+    mavenLocal()
     mavenCentral()
 }
 
@@ -22,6 +23,17 @@ dependencies {
 
     implementation 'org.nd4j:nd4j-cuda-11.6:1.0.0-M2.1'
     implementation 'org.nd4j:nd4j-cuda-11.6-platform:1.0.0-M2.1'
+
+
+    implementation 'org.lwjgl:lwjgl:3.2.3'
+    implementation 'org.lwjgl:lwjgl-glfw:3.2.3'
+    implementation 'org.lwjgl:lwjgl-opengl:3.2.3'
+    implementation 'org.lwjgl:lwjgl-stb:3.2.3'
+    runtimeOnly "org.lwjgl:lwjgl:3.2.3:natives-windows"
+    runtimeOnly "org.lwjgl:lwjgl-opengl:3.2.3:natives-windows"
+    runtimeOnly "org.lwjgl:lwjgl-glfw:3.2.3:natives-windows"
+    runtimeOnly "org.lwjgl:lwjgl-stb:3.2.3:natives-windows"
+    implementation 'org.joml:joml:1.10.4'
 }
 
 test {

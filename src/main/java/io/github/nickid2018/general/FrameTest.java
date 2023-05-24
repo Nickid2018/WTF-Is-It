@@ -1,4 +1,4 @@
-package io.github.nickid2018;
+package io.github.nickid2018.general;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;

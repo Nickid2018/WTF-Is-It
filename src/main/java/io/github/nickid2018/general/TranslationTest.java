@@ -1,4 +1,4 @@
-package io.github.nickid2018;
+package io.github.nickid2018.general;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;

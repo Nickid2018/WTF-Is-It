@@ -1,4 +1,4 @@
-package io.github.nickid2018;
+package io.github.nickid2018.mi;
 
 import java.util.*;
 

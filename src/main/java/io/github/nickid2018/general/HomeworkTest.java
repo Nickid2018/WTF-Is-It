@@ -1,4 +1,4 @@
-package io.github.nickid2018;
+package io.github.nickid2018.general;
 
 import java.util.ArrayList;
 import java.util.LinkedList;

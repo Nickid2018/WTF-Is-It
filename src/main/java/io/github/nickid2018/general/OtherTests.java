@@ -1,4 +1,4 @@
-package io.github.nickid2018;
+package io.github.nickid2018.general;
 
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpUriRequest;

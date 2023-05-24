@@ -1,4 +1,4 @@
-package io.github.nickid2018;
+package io.github.nickid2018.mi;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
