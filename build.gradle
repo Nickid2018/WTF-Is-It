@@ -12,28 +12,28 @@ repositories {
 
 dependencies {
     implementation 'com.google.code.gson:gson:2.10.1'
-    implementation 'commons-io:commons-io:2.7'
+    implementation 'commons-io:commons-io:2.11.0'
     implementation 'it.unimi.dsi:fastutil:8.5.12'
     implementation 'org.apache.commons:commons-math3:3.6.1'
-    implementation 'com.google.guava:guava:14.0.1'
+    implementation 'com.google.guava:guava:31.1-jre'
     implementation 'org.apache.httpcomponents.client5:httpclient5:5.2.1'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
 
 
     implementation 'org.nd4j:nd4j-cuda-11.6:1.0.0-M2.1'
     implementation 'org.nd4j:nd4j-cuda-11.6-platform:1.0.0-M2.1'
 
 
-    implementation 'org.lwjgl:lwjgl:3.2.3'
-    implementation 'org.lwjgl:lwjgl-glfw:3.2.3'
-    implementation 'org.lwjgl:lwjgl-opengl:3.2.3'
-    implementation 'org.lwjgl:lwjgl-stb:3.2.3'
-    runtimeOnly "org.lwjgl:lwjgl:3.2.3:natives-windows"
-    runtimeOnly "org.lwjgl:lwjgl-opengl:3.2.3:natives-windows"
-    runtimeOnly "org.lwjgl:lwjgl-glfw:3.2.3:natives-windows"
-    runtimeOnly "org.lwjgl:lwjgl-stb:3.2.3:natives-windows"
-    implementation 'org.joml:joml:1.10.4'
+    implementation 'org.lwjgl:lwjgl:3.3.1'
+    implementation 'org.lwjgl:lwjgl-glfw:3.3.1'
+    implementation 'org.lwjgl:lwjgl-opengl:3.3.1'
+    implementation 'org.lwjgl:lwjgl-stb:3.3.1'
+    runtimeOnly 'org.lwjgl:lwjgl:3.3.1:natives-windows'
+    runtimeOnly 'org.lwjgl:lwjgl-opengl:3.3.1:natives-windows'
+    runtimeOnly 'org.lwjgl:lwjgl-glfw:3.3.1:natives-windows'
+    runtimeOnly 'org.lwjgl:lwjgl-stb:3.3.1:natives-windows'
+    implementation 'org.joml:joml:1.10.5'
 }
 
 test {
