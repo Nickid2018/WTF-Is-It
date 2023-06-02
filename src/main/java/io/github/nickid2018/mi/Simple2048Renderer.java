@@ -23,7 +23,7 @@ public class Simple2048Renderer {
     public static final int ANIMATION_FRAME = ANIMATION_MOVE + ANIMATION_SPAWN;
     public static final int GAME_OVER_ANIMATION_FRAME = 60;
     public static final int MAX_FPS = 180;
-    public static final float[] TRANSFER_ARRAY = new float[16];
+    private static final float[] TRANSFER_ARRAY = new float[16];
 
     // Window Properties ----------------------------
     private static long windowHandle;
@@ -106,7 +106,7 @@ public class Simple2048Renderer {
                     gameOverAnimationFrame = -GAME_OVER_ANIMATION_FRAME;
                 gameOver = false;
                 animationFrame = 0;
-            } else if (animationFrame == 0 && key == GLFW_KEY_A)
+            } else if (animationFrame == 0 && key == GLFW_KEY_A && !gameOver)
                 aiMode = !aiMode;
             else if (animationFrame == 0 && !gameOver && !aiMode) {
                 boolean moved = false;
@@ -391,7 +391,7 @@ public class Simple2048Renderer {
         int allLen = 41 * length;
         int x = WINDOW_WIDTH / 2 - allLen / 2;
         int y = WINDOW_HEIGHT - 150;
-        int color = Color.HSBtoRGB((float) (score % 1000) / 1000, 0.5f, 0.8f);
+        int color = Color.HSBtoRGB((float) ((score + 667) % 1000) / 1000, 0.5f, 0.8f);
         float r = ((color >> 16) & 0xFF) / 255f;
         float g = ((color >> 8) & 0xFF) / 255f;
         float b = (color & 0xFF) / 255f;
@@ -409,16 +409,49 @@ public class Simple2048Renderer {
             glUniform3fv(uniformColorColor, new float[]{r, g, b});
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         }
+        if (aiMode) {
+            glUseProgram(colorBlockProgramID);
+            glBindVertexArray(globalVAO);
+            glUniform4fv(uniformColorColorBlock, new float[]{0.7f, 0.9f, 0.75f, 0.5f});
+            glUniformMatrix4fv(uniformMatrixColorBlock, false, new Matrix4f()
+                    .translate(toNDCX(592 / 2 - 256 / 4), toNDCY(y - 72), 0)
+                    .scale(130 / (592 / 2f), 41 / (592 * 3 / 4f), 1)
+                    .get(TRANSFER_ARRAY));
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+            glUseProgram(colorProgramID);
+            glBindVertexArray(aiModeVAO);
+            glBindTexture(GL_TEXTURE_2D, textTexture);
+            glUniformMatrix4fv(uniformMatrixColor, false, new Matrix4f()
+                    .translate(toNDCX(592 / 2 - 228 / 4), toNDCY(y - 64), 0)
+                    .scale(114 / (592 / 2f), 25 / (592 * 3 / 4f), 1)
+                    .get(TRANSFER_ARRAY));
+            glUniform3fv(uniformColorColor, new float[]{1f, 1f, 0.53f});
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        }
         glDisable(GL_BLEND);
     }
 
     public static void renderGameOver() {
+        float progress = 1 - Math.abs(gameOverAnimationFrame) / (float) GAME_OVER_ANIMATION_FRAME;
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        if (gameOver || gameOverAnimationFrame != 0) {
+            float alphaProgress = gameOverAnimationFrame >= 0 ?
+                    progress * progress * 0.5f :
+                    (1 - progress) * (1 - progress) * 0.5f;
+            glUseProgram(colorBlockProgramID);
+            glBindVertexArray(globalVAO);
+            glUniform4fv(uniformColorColorBlock, new float[]{0, 0, 0, alphaProgress});
+            glUniformMatrix4fv(uniformMatrixColorBlock, false, new Matrix4f()
+                    .scale(2, 2, 1)
+                    .translate(-0.5f, -0.5f, 0)
+                    .get(TRANSFER_ARRAY));
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        }
         if (gameOverAnimationFrame == 0 && gameOver) {
             glUseProgram(colorBlockProgramID);
             glBindVertexArray(globalVAO);
-            glUniform4fv(uniformColorColorBlock, new float[]{0, 0, 0, 0.5f});
+            glUniform4fv(uniformColorColorBlock, new float[]{0, 0, 0, 0.7f});
             glUniformMatrix4fv(uniformMatrixColorBlock, false, new Matrix4f()
                     .translate(0, toNDCY(350), 0)
                     .scale(2, 128 / (592 * 3 / 4f), 1)
@@ -436,14 +469,13 @@ public class Simple2048Renderer {
             glUniform3fv(uniformColorColor, new float[]{1f, 0.25f, 0.32f});
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         } else if (gameOverAnimationFrame != 0) {
-            float progress = 1 - Math.abs(gameOverAnimationFrame) / (float) GAME_OVER_ANIMATION_FRAME;
             glEnable(GL_STENCIL_TEST);
             glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
             glStencilFunc(GL_ALWAYS, 1, 0xFF);
             glStencilMask(0xFF);
             glUseProgram(colorBlockProgramID);
             glBindVertexArray(globalVAO);
-            glUniform4fv(uniformColorColorBlock, new float[]{0, 0, 0, 0.5f});
+            glUniform4fv(uniformColorColorBlock, new float[]{0, 0, 0, 0.7f});
             if (gameOverAnimationFrame > 0)
                 glUniformMatrix4fv(uniformMatrixColorBlock, false, new Matrix4f()
                         .translate(1, toNDCY(414), 0)
@@ -502,12 +534,13 @@ public class Simple2048Renderer {
                 gameOverAnimationFrame--;
             if (gameOverAnimationFrame < 0)
                 gameOverAnimationFrame++;
-            if (System.currentTimeMillis() - lastRecordTime > 1000) {
+            long currentTime = System.currentTimeMillis();
+            if (currentTime - lastRecordTime > 1000) {
                 glfwSetWindowTitle(windowHandle, "Simple 2048 - " + fpsCounter + " FPS");
                 fpsCounter = 0;
-                lastRecordTime = System.currentTimeMillis();
+                lastRecordTime = currentTime;
             }
-            if (System.currentTimeMillis() - lastRenderTime < 1000 / MAX_FPS)
+            if (currentTime - lastRenderTime < 1000 / MAX_FPS)
                 Thread.sleep(1000 / MAX_FPS - (System.currentTimeMillis() - lastRenderTime));
         }
         terminate();

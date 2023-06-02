@@ -278,4 +278,14 @@ public class Simple2048 {
     public int size() {
         return size;
     }
+
+    public Simple2048 copy() {
+        Simple2048 copy = new Simple2048(size);
+        for (int i = 0; i < size; i++)
+            System.arraycopy(table[i], 0, copy.table[i], 0, size);
+        copy.maxValue = maxValue;
+        copy.spareCount = spareCount;
+        System.arraycopy(valueSpared, 0, copy.valueSpared, 0, spareCount);
+        return copy;
+    }
 }

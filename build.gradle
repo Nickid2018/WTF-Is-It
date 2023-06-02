@@ -21,6 +21,11 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
 
 
+    implementation 'org.deeplearning4j:deeplearning4j-core:1.0.0-M2.1'
+    implementation 'org.deeplearning4j:deeplearning4j-zoo:1.0.0-M2.1'
+    implementation 'org.nd4j:nd4j-cuda-11.6:1.0.0-M2.1'
+    implementation 'org.bytedeco:javacpp-platform:1.5.7'
+    implementation 'org.deeplearning4j:deeplearning4j-cuda-11.0:1.0.0-M1.1'
     implementation 'org.nd4j:nd4j-cuda-11.6:1.0.0-M2.1'
     implementation 'org.nd4j:nd4j-cuda-11.6-platform:1.0.0-M2.1'
 
