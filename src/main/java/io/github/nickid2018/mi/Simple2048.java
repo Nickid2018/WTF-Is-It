@@ -1,11 +1,16 @@
 package io.github.nickid2018.mi;
 
+import it.unimi.dsi.fastutil.longs.LongList;
+
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
+import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 
 public class Simple2048 {
 
@@ -88,7 +93,15 @@ public class Simple2048 {
     }
 
     public boolean doMove(MoveDirection direction) {
-        boolean success = internalMove(direction);
+        boolean success = internalMove(direction, null);
+        if (success)
+            // If moved successfully, spawn new value
+            spawnRandomValue();
+        return success;
+    }
+
+    public boolean doMove(MoveDirection direction, LongList merges) {
+        boolean success = internalMove(direction, merges);
         if (success)
             // If moved successfully, spawn new value
             spawnRandomValue();
@@ -104,7 +117,7 @@ public class Simple2048 {
         };
     }
 
-    public boolean internalMove(MoveDirection direction) {
+    public boolean internalMove(MoveDirection direction, LongList merges) {
         boolean success = false;
         // Re-calculate spare count
         spareCount = 0;
@@ -125,6 +138,8 @@ public class Simple2048 {
                         // and the value equals last value, merge them and set last value to 0
                         long result = outStream.set(nowPosition.get() - 1, last + value);
                         score += result;
+                        if (merges != null)
+                            merges.add(result);
                         if (result > maxValue)
                             maxValue = result;
                         if (moveListener != null) {
@@ -279,13 +294,30 @@ public class Simple2048 {
         return size;
     }
 
+    public int getSpareCount() {
+        return spareCount;
+    }
+
     public Simple2048 copy() {
         Simple2048 copy = new Simple2048(size);
         for (int i = 0; i < size; i++)
             System.arraycopy(table[i], 0, copy.table[i], 0, size);
         copy.maxValue = maxValue;
         copy.spareCount = spareCount;
+        copy.score = score;
         System.arraycopy(valueSpared, 0, copy.valueSpared, 0, spareCount);
         return copy;
+    }
+
+    public void rotateRight() {
+        long[][] copy = new long[size][size];
+        for (int i = 0; i < size; i++)
+            System.arraycopy(table[i], 0, copy[i], 0, size);
+        for (int i = 0; i < size; i++)
+            for (int j = 0; j < size; j++)
+                table[i][j] = copy[size - j - 1][i];
+        System.arraycopy(
+                IntStream.of(valueSpared).map(i -> (size - i % size - 1) * size + i / size).toArray(),
+                0, valueSpared, 0, spareCount);
     }
 }

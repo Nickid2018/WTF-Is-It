@@ -6,9 +6,11 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL;
 
 import java.awt.*;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Random;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL32.*;
@@ -23,6 +25,7 @@ public class Simple2048Renderer {
     public static final int ANIMATION_FRAME = ANIMATION_MOVE + ANIMATION_SPAWN;
     public static final int GAME_OVER_ANIMATION_FRAME = 60;
     public static final int MAX_FPS = 180;
+    public static final boolean VSYNC = true;
     private static final float[] TRANSFER_ARRAY = new float[16];
 
     // Window Properties ----------------------------
@@ -60,6 +63,10 @@ public class Simple2048Renderer {
     private static boolean[] stays = new boolean[16];
     private static int spawnSlot = -1;
     private static long spawnValue = 0;
+    private static QLearning qLearning;
+    private static Random random = new Random();
+    private static int failedCounter = 0;
+    private static int moveCounter = 0;
 
     public static void init() throws Exception {
         glfwInit();
@@ -69,13 +76,14 @@ public class Simple2048Renderer {
         GL.createCapabilities();
         glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
         glfwSetKeyCallback(windowHandle, Simple2048Renderer::keyCallback);
-        glfwSwapInterval(1);
+        glfwSwapInterval(VSYNC ? 1 : 0);
         game = new Simple2048(4);
         game.setMoveListener(Simple2048Renderer::moveListener);
         game.setSpawnListener(Simple2048Renderer::spawnListener);
         game.setStayListener(Simple2048Renderer::stayListener);
         uploadTextures();
         compileShadersAndVAO();
+        qLearning = new QLearning(0.9f, 0.9f, 2000, "model.zip");
     }
 
     public static void moveListener(int line, int fromSlot, int endSlot, MoveDirection direction, long sourceData, long endData) {
@@ -106,7 +114,12 @@ public class Simple2048Renderer {
                     gameOverAnimationFrame = -GAME_OVER_ANIMATION_FRAME;
                 gameOver = false;
                 animationFrame = 0;
-            } else if (animationFrame == 0 && key == GLFW_KEY_A && !gameOver)
+            } else if (key == GLFW_KEY_KP_ADD)
+                try {
+                    qLearning = new QLearning(0.9f, 0.9f, 2000, "model.zip");
+                } catch (IOException ignored) {
+                }
+            else if (key == GLFW_KEY_A && !gameOver)
                 aiMode = !aiMode;
             else if (animationFrame == 0 && !gameOver && !aiMode) {
                 boolean moved = false;
@@ -132,19 +145,17 @@ public class Simple2048Renderer {
     }
 
     public static boolean onAIMove(MoveDirection m) {
-        if (animationFrame == 0 && !gameOver) {
-            Arrays.fill(stays, false);
-            Arrays.fill(moveData, null);
-            game.doMove(m);
+        Arrays.fill(stays, false);
+        Arrays.fill(moveData, null);
+        boolean moved = game.doMove(m);
+        if (moved) {
             animationFrame = ANIMATION_FRAME;
             if (!game.checkContinue()) {
                 gameOver = true;
                 gameOverAnimationFrame = GAME_OVER_ANIMATION_FRAME;
-                return false;
             }
-            return true;
         }
-        return false;
+        return moved;
     }
 
     public static float toNDCX(int x) {
@@ -534,6 +545,24 @@ public class Simple2048Renderer {
                 gameOverAnimationFrame--;
             if (gameOverAnimationFrame < 0)
                 gameOverAnimationFrame++;
+            if (gameOver && failedCounter != 0) {
+                System.out.println("AI failed " + failedCounter + "/" + moveCounter + " times!");
+                failedCounter = 0;
+                moveCounter = 0;
+            }
+            if (aiMode && !gameOver && animationFrame == 0) {
+                MoveDirection[] direction = qLearning.getMoveLow(game);
+                moveCounter++;
+                for (int i = 3; i >= 0; i--) {
+                    if (onAIMove(direction[i])) {
+                        System.out.println("AI first moving " + direction[i] + "!");
+                        break;
+                    } if (i == 3) {
+                        System.out.println("AI first moving failed!");
+                        failedCounter++;
+                    }
+                }
+            }
             long currentTime = System.currentTimeMillis();
             if (currentTime - lastRecordTime > 1000) {
                 glfwSetWindowTitle(windowHandle, "Simple 2048 - " + fpsCounter + " FPS");
