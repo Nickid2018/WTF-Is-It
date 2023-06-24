@@ -282,7 +282,7 @@ public class QLearning {
     }
 
     public static void main(String[] args) throws IOException {
-        QLearning qLearning = new QLearning(0.9f, 0.9f, 1e-4f, 2000);
+        QLearning qLearning = new QLearning(0.5f, 0.9f, 1e-4f, 2000);
         System.out.println("Start");
         for (int i = 0; i < 100000; i++) {
             System.out.println("Epoch: " + i);
