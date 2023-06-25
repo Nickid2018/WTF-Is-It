@@ -331,13 +331,13 @@ public class BPNetworkAlgorithmND {
 //        BPNetwork network = new BPNetwork(784, MSE);
 //        network.addLayer(256, TANH);
 //        network.addOutputLayer(10, RELU);
-        BPNetwork network = BPNetworkSerializer.load("D:\\Download\\256relu+10relu.ser");
+        BPNetwork network = BPNetworkSerializer.load("256relu+10relu.ser");
         IntList order = new IntArrayList();
         for (int i = 0; i < 60000; i++)
             order.add(i);
         for (int i = 0; i < 20; i++) {
-            INDArray[] trainImages = getImages("D:\\Download\\train-images.idx3-ubyte");
-            INDArray trainLabels = getLabels("D:\\Download\\train-labels.idx1-ubyte");
+            INDArray[] trainImages = getImages("train-images.idx3-ubyte");
+            INDArray trainLabels = getLabels("train-labels.idx1-ubyte");
             INDArray output = Nd4j.zeros(10, 1);
             Collections.shuffle(order);
             int count = 0;
@@ -351,12 +351,12 @@ public class BPNetworkAlgorithmND {
                 output.putScalar((int) label, 0, 0);
             }
             try {
-                BPNetworkSerializer.save(network, "D:\\Download\\network" + i + ".ser");
+                BPNetworkSerializer.save(network, "network" + i + ".ser");
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            INDArray[] testImages = getImages("D:\\Download\\t10k-images.idx3-ubyte");
-            INDArray testLabels = getLabels("D:\\Download\\t10k-labels.idx1-ubyte");
+            INDArray[] testImages = getImages("t10k-images.idx3-ubyte");
+            INDArray testLabels = getLabels("t10k-labels.idx1-ubyte");
             int correct = 0;
             for (int index = 0; index < 10000; index++) {
                 output = network.predict(testImages[index]).reshape(10);
